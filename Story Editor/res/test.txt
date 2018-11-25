@@ -1,0 +1,9 @@
+2
+0-11,family:Comic Sans MS,size:12,bold:false,italic:false
+11-15,family:Dialog
+
+Hello
+
+R
+
+L
