@@ -1,8 +1,10 @@
 package TextEditor;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 
+import javax.swing.text.AbstractDocument.LeafElement;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.StyleConstants;
 
@@ -51,9 +53,33 @@ public class AttributeCommand {
 		}
 	}
 	
+	public boolean isEqual(AttributeCommand other) {
+		for(int i = 0; i < attributes.size(); i++) {
+			if(!attributes.get(i).equals(other.getAttributes().get(i)) ||
+					!newRevision.get(i).equals(other.getRevisions().get(i)))
+				return false;
+		}
+		return true;
+	}
+	
 	public AttributeCommand() {
 		attributes = new ArrayList<>();
 		newRevision = new ArrayList<>();
+	}
+	
+	public AttributeCommand(LeafElement leafElement) {
+		this();
+		
+		Enumeration<?> e = leafElement.getAttributeNames();
+		while(e.hasMoreElements()) {
+			Object o = e.nextElement();
+			
+			attributes.add(o.toString());
+			newRevision.add(leafElement.getAttribute(o));
+		}
+		
+		startIndex = leafElement.getStartOffset();
+		endIndex = leafElement.getEndOffset();
 	}
 	
 	public String toString() {
