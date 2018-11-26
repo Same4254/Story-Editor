@@ -52,20 +52,18 @@ public class BasicEditor extends JFrame {
 	/**
 	 * Small Bugs:
 	 * 	   - Double click to select and drag left de-selects the original word
-	 * 	   - why us underline null? 
 	 * 
 	 * Next:
 	 * 	   - Some additions such as centering the text, and small other options
-	 * 	   - Spruce up the editor a bit... it's ugly
+	 * 	   - Spruce up the editor... it's ugly
 	 * 	   - Begin the actual project, this is just one part 
 	 * 
 	 * To Do Later:
 	 *     - Hot keys to change character properties
 	 *     		- Hot key panel to view and edit hotkeys...?
-	 *     - Spell checker / auto-correct
+	 *     - Spell checker / auto-correct / grammar check
 	 *     - Save to a folder  
 	 *     - Implement undo and re-do.
-	 *     - 
 	 */
     public BasicEditor() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
