@@ -6,13 +6,13 @@ import java.util.HashMap;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.StyleConstants;
 
-public class AttributeDifference {
+public class AttributeCommand {
 	public static final Object[] constantsToCheck = {
 		StyleConstants.FontFamily,
 		StyleConstants.FontSize,
 		StyleConstants.Bold,
-		StyleConstants.Italic
-//		StyleConstants.Underline
+		StyleConstants.Italic,
+		StyleConstants.Underline
 	};
 	
 	public static HashMap<String, Object> objectMap;
@@ -28,7 +28,7 @@ public class AttributeDifference {
 	private ArrayList<String> attributes;
 	private ArrayList<Object> newRevision;
 	
-	public AttributeDifference(AttributeSet set1, AttributeSet set2, int startIndex) {
+	public AttributeCommand(AttributeSet set1, AttributeSet set2, int startIndex) {
 		this.attributes = new ArrayList<>();
 		this.newRevision = new ArrayList<>();
 		this.startIndex = startIndex;
@@ -51,7 +51,7 @@ public class AttributeDifference {
 		}
 	}
 	
-	public AttributeDifference() {
+	public AttributeCommand() {
 		attributes = new ArrayList<>();
 		newRevision = new ArrayList<>();
 	}

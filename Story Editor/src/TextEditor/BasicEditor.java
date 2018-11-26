@@ -10,11 +10,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -22,7 +23,9 @@ import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.text.AbstractDocument.LeafElement;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -35,7 +38,7 @@ public class BasicEditor extends JFrame {
 	private JTextPane textPane;
 	private JComboBox<String> fontFamilies;
 	private JComboBox<Integer> fontSizes;
-	private JToggleButton boldSwitch, italicSwitch;//, underlineSwitch;
+	private JToggleButton boldSwitch, italicSwitch, underlineSwitch;
 	private JButton saveButton;
 	private JButton loadButton;
 	
@@ -58,9 +61,6 @@ public class BasicEditor extends JFrame {
 	 *     - Implement undo and re-do.
 	 */
     public BasicEditor() {
-    	JEditorPane pane = new JEditorPane();
-    	pane.prop
-    	
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1700, 1080);
         
@@ -166,23 +166,23 @@ public class BasicEditor extends JFrame {
         
         buttons.add(italicSwitch);
         
-//        underlineSwitch = new JToggleButton("Underline");
-//        underlineSwitch.setFocusable(false);
-//        underlineSwitch.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				boolean underline = underlineSwitch.isSelected();
-//				String toReplace = textPane.getSelectedText();
-//				
-//				setUnderline(underline);
-//				
-//				if(toReplace == null)
-//					textPane.replaceSelection(toReplace);
-//			}
-//		});
-//        setUnderline(false);
-//        
-//        buttons.add(underlineSwitch);
+        underlineSwitch = new JToggleButton("Underline");
+        underlineSwitch.setFocusable(false);
+        underlineSwitch.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean underline = underlineSwitch.isSelected();
+				String toReplace = textPane.getSelectedText();
+				
+				setUnderline(underline);
+				
+				if(toReplace == null)
+					textPane.replaceSelection(toReplace);
+			}
+		});
+        setUnderline(false);
+        
+        buttons.add(underlineSwitch);
         
         saveButton = new JButton("Save");
         saveButton.setFocusable(false);
@@ -241,22 +241,15 @@ public class BasicEditor extends JFrame {
      *  		(The reason for this number is to avoid the user accidently typing information 
      *  		that this may interpret as pertinent file information).
      *  	- Several lines of information, each containing the 
-     *  		indecies of application,
+     *  		indices of application,
      *  		the changes to be applied before writing to the text
      *  	- The actual String content of the page
+     *  
+     *  TODO
+     *  	- This saves A LOT of extra work for itself. For some reason new line characters get their own node, and every node is saved individually.
+     *  		 creating a lot of fluff in the file, and more for the program to loop through later on.
      */
-    private void save() {//Bad caret position and index out of bounds occur when paragraphing is used in the text
-//    	System.out.println(textPane.getText());
-//
-//    	for(int i = 0; i < textPane.getText().length(); i++) {
-//    		System.out.println(i + "----");
-//    		System.out.println(textPane.getText().substring(i, i+1));
-//    		System.out.println("----");
-//    	}
-    	
-    	blockCaretListener = true;//The listener doesn't need to know anything that happens here...
-    	int originalCaretPosition = textPane.getCaretPosition();
-    	
+    private void save() {
     	File file = new File("res/test.txt");//Setting up a test file
     	PrintWriter writer = null;
 		try {
@@ -265,49 +258,56 @@ public class BasicEditor extends JFrame {
 			e.printStackTrace();
 		}
     	
-		textPane.setCaretPosition(0);//original conditions to compare to
-		AttributeSet last = textPane.getCharacterAttributes();
-		
-		ArrayList<AttributeDifference> differences = new ArrayList<>();//List of all the differences
-		differences.add(new AttributeDifference(null, last, 0));
-		
-		int length = textPane.getText().length();
-		for(int i = 1; i < length; i++) {
-			try {
-				textPane.setCaretPosition(i);
-			} catch(IllegalArgumentException e) {
-				break;
-			}
-			
-			AttributeSet attributes = getAttributeSetAtCaret();//textPane.getCharacterAttributes();
-			
-			System.out.println(attributes);
-			
-//			if(attributes.containsAttribute(StyleConstants.Family, "Dialog"))
-//				System.out.println("Here");
-			
-			if(!attributes.isEqual(last)) {
-				differences.get(differences.size() - 1).setEndIndex(i);
-				differences.add(new AttributeDifference(last, attributes, i));
-			}
-			
-			last = attributes;
-		}
-		
-		differences.get(differences.size() - 1).setEndIndex(length);
-		
-		writer.println(Integer.toString(differences.size()));
-		for(AttributeDifference difference : differences)
-			writer.println(difference);
-		writer.println();
-		
-		writer.print(textPane.getText());
-		
+    	LinkedList<LeafElement> leafNodes = new LinkedList<>();
+    	getLeafNodes(textPane.getDocument().getDefaultRootElement(), leafNodes);
+
+    	LeafElement last = leafNodes.getLast();
+    	
+    	int endIndex = -1;
+    	if(last.getAttributeCount() == 0) {
+    		endIndex = last.getEndOffset();
+    		leafNodes.removeLast();
+    	}
+    	
+    	writer.println(leafNodes.size());
+    	
+    	int count = 0;//index of the element in the linked-list (avoid random access)
+    	for(LeafElement node : leafNodes) {
+    		Enumeration<?> e = node.getAttributeNames();
+    		
+    		if(count == leafNodes.size() - 1 && endIndex > 0)//Check if it is the last (avoids .equals of the node element, this is cheaper... probably)
+    			writer.print(node.getStartOffset() + "-" + endIndex + ",");
+    		else
+    			writer.print(node.getStartOffset() + "-" + node.getEndOffset() + ",");
+    		
+    		while(e.hasMoreElements()) {
+    			Object o = e.nextElement();
+    			writer.print(o + ":" + node.getAttribute(o));
+    			
+    			if(e.hasMoreElements())
+    				writer.print(",");
+    			else
+    				writer.println();
+    		}
+    		
+    		count++;
+    	}
+    	
+    	writer.println();//just an empty line to separate info from content
+    	writer.print(textPane.getText());
+    	
     	writer.close();
-    	textPane.setCaretPosition(originalCaretPosition);
-    	blockCaretListener = false;//Nothing happend, we swear....
     }
     
+    private void getLeafNodes(Element element, LinkedList<LeafElement> nodes) {
+    	if(element.isLeaf()) {
+    		nodes.add((LeafElement) element);
+    		return;
+    	} 
+    	
+    	for(int i = 0; i < element.getElementCount(); i++)
+    		getLeafNodes(element.getElement(i), nodes);
+    }
     
     /*
      *	The first line in the file is the the amount of lines before the actual text of the content (this contains an empty line as well). 
@@ -326,7 +326,7 @@ public class BasicEditor extends JFrame {
     	
     	int amountOfLines = Integer.parseInt(sc.nextLine());
     	
-    	AttributeDifference[] differences = new AttributeDifference[amountOfLines];
+    	AttributeCommand[] differences = new AttributeCommand[amountOfLines];
     	for(int i = 0; i < amountOfLines; i++) {//Attribute Differences
     		String[] parts = sc.nextLine().split(",");
     		
@@ -334,7 +334,7 @@ public class BasicEditor extends JFrame {
     		int startIndex = Integer.parseInt(indecies[0]);
     		int endIndex = Integer.parseInt(indecies[1]);
     		
-    		AttributeDifference difference = new AttributeDifference();
+    		AttributeCommand difference = new AttributeCommand();
 			difference.setStartIndex(startIndex);
 			difference.setEndIndex(endIndex);
     		
@@ -372,14 +372,19 @@ public class BasicEditor extends JFrame {
     		contentAssembler.append("\n");
     	}
 
-    	for(AttributeDifference difference : differences) {
+    	for(int i = 0; i < differences.length; i++) {
+    		AttributeCommand difference = differences[i];
+    		
     		ArrayList<String> attributes = difference.getAttributes();
     		ArrayList<Object> revisions = difference.getRevisions();
     		
-    		for(int i = 0; i < attributes.size(); i++)
-    			setAttribute(AttributeDifference.objectMap.get(attributes.get(i)), revisions.get(i));
+    		for(int j = 0; j < attributes.size(); j++)
+    			setAttribute(AttributeCommand.objectMap.get(attributes.get(j)), revisions.get(j));
     		
-    		textPane.replaceSelection(contentAssembler.substring(difference.getStartIndex(), difference.getEndIndex()));
+    		if(i == differences.length - 1)
+    			textPane.replaceSelection(contentAssembler.substring(difference.getStartIndex()));
+    		else
+    			textPane.replaceSelection(contentAssembler.substring(difference.getStartIndex(), difference.getEndIndex()));
     	}
     	
     	sc.close();
@@ -410,13 +415,13 @@ public class BasicEditor extends JFrame {
     	if(caretPosition > 0) {//Move the cursor back to the last text
     		caretPosition--;
     		
-    		String s = null;
-    		while(!(s = textPane.getText().substring(caretPosition, caretPosition + 1)).equals("\n") || !s.equals("\r")) {
-    			if(caretPosition == 0)
-    				break;
-    			
-    			caretPosition--;
-    		}
+//    		String s = null;
+//    		while(!(s = textPane.getText().substring(caretPosition, caretPosition + 1)).equals("\n") || !s.equals("\r")) {
+//    			if(caretPosition == 0)
+//    				break;
+//    			
+//    			caretPosition--;
+//    		}
     	}
     	
     	textPane.setCaretPosition(caretPosition);
@@ -425,7 +430,7 @@ public class BasicEditor extends JFrame {
 		fontSizes.setSelectedItem(getAttribute(StyleConstants.FontSize));
 		boldSwitch.setSelected((Boolean) getAttribute(StyleConstants.Bold));
 		italicSwitch.setSelected((Boolean) getAttribute(StyleConstants.Italic));
-//		underlineSwitch.setSelected(isUnderline());
+		underlineSwitch.setSelected(isUnderline());
 		
 		textPane.setCaretPosition(temp);
 		
@@ -473,9 +478,9 @@ public class BasicEditor extends JFrame {
     	setAttribute(StyleConstants.Italic, italic);
     }
     
-//    private void setUnderline(boolean underline) {
-//    	setAttribute(StyleConstants.Underline, underline);
-//    }
+    private void setUnderline(boolean underline) {
+    	setAttribute(StyleConstants.Underline, underline);
+    }
     
     private boolean isUnderline() {
     	Object o = getAttribute(StyleConstants.Underline);
@@ -490,6 +495,7 @@ public class BasicEditor extends JFrame {
     }
 
     public static void main(String[] args) throws IOException {
+    	System.setProperty("line.separator", "\n");
         new BasicEditor();
     }
 }
