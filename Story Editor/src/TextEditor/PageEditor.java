@@ -26,18 +26,17 @@ import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.AbstractDocument.LeafElement;
-
-import com.sun.glass.events.KeyEvent;
-
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
+import com.sun.glass.events.KeyEvent;
+
 import TextEditor.PageKit.PageableEditorKit;
 
-public class BasicEditor extends JFrame {
+public class PageEditor extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private JTextPane textPane;
@@ -52,28 +51,32 @@ public class BasicEditor extends JFrame {
 	/**
 	 * Small Bugs:
 	 * 	   - Double click to select and drag left de-selects the original word
+	 * 	   - Undo manager will undo hot key presses, but that doesn't update the gui
 	 * 
 	 * Next:
-	 * 	   - Some additions such as centering the text, and small other options
+	 * 	   - Some additions such as centering the text, and small other options. More attributes
 	 * 	   - Spruce up the editor... it's ugly
-	 * 	   - Begin the actual project, this is just one part 
+	 * 	   - Be able to add Images 
 	 * 
 	 * To Do Later:
 	 *     - Hot keys to change character properties
-	 *     		- Hot key panel to view and edit hotkeys...?
+	 *     		- Hot key panel to view and edit hot keys...?
 	 *     - Spell checker / auto-correct / grammar check
-	 *     - Save to a folder  
 	 *     - Implement undo and re-do.
+	 *     		- Change undo and re-do limit (options menu?)
+	 *     - Export as docx?
+	 *     - Import docx files
+	 *     - Save project folder to google drive to allow multi computer devlopment
 	 */
-    public BasicEditor() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1700, 1080);
-        
+    public PageEditor() {
         setLayout(new BorderLayout());
         
         textPane = new JTextPane();
         textPane.setEditorKit(new PageableEditorKit(textPane));
         textPane.setEditable(true);
+        
+//        UndoManager undoManager = new UndoManager();
+//        textPane.getDocument().addUndoableEditListener(undoManager);
         
         JScrollPane textScrollPane = new JScrollPane(textPane); 
         textScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -250,8 +253,28 @@ public class BasicEditor extends JFrame {
 				underlineSwitch.doClick();
 			}
 		});
-
-        setVisible(true);
+        
+//        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK, true), "Undo");
+//        textPane.getActionMap().put("Undo", new AbstractAction() {
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				if(undoManager.canUndo())
+//					undoManager.undo();
+//			}
+//		});
+//        
+//        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK, true), "Redo");
+//        textPane.getActionMap().put("Redo", new AbstractAction() {
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				if(undoManager.canRedo())
+//					undoManager.redo();
+//			}
+//		});
     }
     
     /*
@@ -498,6 +521,12 @@ public class BasicEditor extends JFrame {
 
     public static void main(String[] args) throws IOException {
     	System.setProperty("line.separator", "\n");
-        new BasicEditor();
+    	
+    	JFrame frame = new JFrame();
+    	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1700, 1080);
+        
+        frame.add(new PageEditor());
+        frame.setVisible(true);
     }
 }
