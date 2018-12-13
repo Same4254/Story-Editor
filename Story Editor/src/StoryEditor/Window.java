@@ -3,6 +3,7 @@ package StoryEditor;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 
+import TextEditor.ChapterEditor;
 import Util.ImageUtils;
 
 /**
@@ -11,19 +12,19 @@ import Util.ImageUtils;
  * 
  * @author Sam
  */
-public class StoryEditor extends JSplitPane {
+public class Window extends JSplitPane {
 	private static final long serialVersionUID = 1L;
 	
 	private FileTreePanel fileTree;
-	private Editor editor;
+	private ChapterEditor editor;
 	
-	public StoryEditor() {
+	public Window() {
 
 	}
 	
-	private StoryEditor init() {
+	private Window init() {
 		fileTree = new FileTreePanel(this);
-		editor = new Editor(this);
+		editor = new ChapterEditor(this);
 
 		setTopComponent(fileTree);
 		setBottomComponent(editor);
@@ -32,7 +33,7 @@ public class StoryEditor extends JSplitPane {
 	}
 	
 	public FileTreePanel getFileTreePanel() { return fileTree; }
-	public Editor getEditor() { return editor; }
+	public ChapterEditor getEditor() { return editor; }
 	
 	public static void main(String[] args) {
 		System.setProperty("line.separator", "\n");
@@ -43,7 +44,7 @@ public class StoryEditor extends JSplitPane {
 		frame.setTitle("Story Editor");
 		frame.setIconImage(ImageUtils.readImage("res/book.png"));
 		
-		frame.add(new StoryEditor().init());
+		frame.add(new Window().init());
 		frame.setVisible(true);
 	}
 }

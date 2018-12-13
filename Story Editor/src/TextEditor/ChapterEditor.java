@@ -1,20 +1,21 @@
-package StoryEditor;
+package TextEditor;
 
 import java.awt.Component;
 import java.io.File;
 
-import javax.swing.JTabbedPane;
+import StoryEditor.PageEditor;
+import StoryEditor.Window;
+import StoryEditor.TabDragging.TabComponent;
+import StoryEditor.TabDragging.TabDragPane;
 
-import TextEditor.PageEditor;
-
-public class Editor extends JTabbedPane {
+public class ChapterEditor extends TabDragPane {
 	private static final long serialVersionUID = 1L;
 
-	private StoryEditor storyEditor;
+	private Window window;
 	
-	public Editor(StoryEditor storyEditor) {
-		this.storyEditor = storyEditor;
-		
+	public ChapterEditor(Window window) {
+		this.window = window;
+			
 	}
 	
 	public void addChapterTextEditor(File chapter) {
@@ -37,6 +38,8 @@ public class Editor extends JTabbedPane {
 		pageEditor.setFile(chapter);
 		
 		addTab(chapter.getName(), pageEditor);
+		
 		setSelectedIndex(getTabCount() - 1);
+		setTabComponentAt(getTabCount() - 1, new TabComponent(this, chapter.getName()));
 	}
 }

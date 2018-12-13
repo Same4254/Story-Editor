@@ -15,16 +15,20 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import StoryEditor.RightClickMenu.RightClickMenu;
+
 public class FileTreePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private JTree tree;
 	
 	private FileNode root;
-	private StoryEditor storyEditor;
+	private Window window;
 	
-	public FileTreePanel(StoryEditor storyEditor) {
-		this.storyEditor = storyEditor;
+	private RightClickMenu rightClickMenu;
+	
+	public FileTreePanel(Window window) {
+		this.window = window;
 		
 		setMinimumSize(new Dimension(125, 0));
 		
@@ -45,8 +49,16 @@ public class FileTreePanel extends JPanel {
 					if(path != null) {
 						FileNode node = (FileNode) path.getLastPathComponent();
 
-						storyEditor.getEditor().addChapterTextEditor(node.getFile());
+						window.getEditor().addChapterTextEditor(node.getFile());
 					}
+				}
+			}
+			
+			public void mouseReleased(MouseEvent e) {
+				if(e.getButton() == 3) {
+					System.out.println("Right Click");
+					
+					
 				}
 			}
 		};
@@ -67,6 +79,7 @@ public class FileTreePanel extends JPanel {
 					
 					if(node == null)
 						return;
+					
 					
 				}
 			}
