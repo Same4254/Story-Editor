@@ -46,6 +46,8 @@ public class PageEditor extends JPanel {
 	private JButton saveButton;
 	private JButton loadButton;
 	
+	private File file;
+	
 	private boolean blockCaretListener;
 	
 	/**
@@ -202,17 +204,17 @@ public class PageEditor extends JPanel {
         
         buttons.add(saveButton);
         
-        loadButton = new JButton("Load");
-        loadButton.setFocusable(false);
-        
-        loadButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				read(new File("res/test.txt"));
-			}
-		});
-        
-        buttons.add(loadButton);
+//        loadButton = new JButton("Load");
+//        loadButton.setFocusable(false);
+//        
+//        loadButton.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				read(new File("res/test.txt"));
+//			}
+//		});
+//        
+//        buttons.add(loadButton);
         
         add(buttons, BorderLayout.NORTH);
 
@@ -251,6 +253,17 @@ public class PageEditor extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				underlineSwitch.doClick();
+			}
+		});
+        
+        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK, true), "Save");
+        textPane.getActionMap().put("Save", new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				save();
+				System.out.println("Save");
 			}
 		});
         
@@ -300,7 +313,11 @@ public class PageEditor extends JPanel {
      *  	- The actual String content of the page
      */
     private void save() {
-    	File file = new File("res/test.txt");//Setting up a test file
+//    	File file = new File("res/test.txt");//Setting up a test file
+    	if(file == null) {//Save as -> The File has not been created yet...
+    		
+    	}
+    	
     	PrintWriter writer = null;
 		try {
 			writer = new PrintWriter(file);
@@ -379,7 +396,7 @@ public class PageEditor extends JPanel {
      *	Thereafter will be a blank line. 
      *	Then, the text itself will be written down.
      */
-    public void read(File file) {
+    public void read() {
     	blockCaretListener = true;//the caret listener needs not worry of this...
     	textPane.setText("");//empty the pane
     	
@@ -390,6 +407,9 @@ public class PageEditor extends JPanel {
 			e.printStackTrace();
 		}
     	
+		if(!sc.hasNextLine())
+			return;
+		
     	int amountOfLines = Integer.parseInt(sc.nextLine());
     	
     	AttributeCommand[] differences = new AttributeCommand[amountOfLines];
@@ -519,6 +539,9 @@ public class PageEditor extends JPanel {
     private void setItalic(boolean italic) { setAttribute(StyleConstants.Italic, italic); }
     private void setUnderline(boolean underline) { setAttribute(StyleConstants.Underline, underline); }
 
+    public void setFile(File file) { this.file = file; read(); }
+    public File getFile() { return this.file; }
+    
     public static void main(String[] args) throws IOException {
     	System.setProperty("line.separator", "\n");
     	
