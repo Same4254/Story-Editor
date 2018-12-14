@@ -12,9 +12,11 @@ import java.nio.file.Files;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import StoryEditor.RightClickMenu.Lambda;
 import StoryEditor.RightClickMenu.RightClickMenu;
 
 public class FileTreePanel extends JPanel {
@@ -41,6 +43,13 @@ public class FileTreePanel extends JPanel {
 		
 		tree.expandPath(new TreePath(root.getPath()));
 		
+		rightClickMenu = new RightClickMenu(new String[] { "Test" }, new Lambda() {
+			@Override
+			public void run() {
+				System.out.println("Here");
+			}
+		});
+		
 		MouseAdapter adapter = new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				if(e.getClickCount() == 2) {
@@ -48,17 +57,14 @@ public class FileTreePanel extends JPanel {
 					
 					if(path != null) {
 						FileNode node = (FileNode) path.getLastPathComponent();
-
 						window.getEditor().addChapterTextEditor(node.getFile());
 					}
 				}
 			}
 			
 			public void mouseReleased(MouseEvent e) {
-				if(e.getButton() == 3) {
-					System.out.println("Right Click");
-					
-					
+				if(SwingUtilities.isRightMouseButton(e)) { 
+					rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 				}
 			}
 		};
@@ -124,7 +130,7 @@ public class FileTreePanel extends JPanel {
 //		
 //		tree.expandPath(new TreePath(root.getPath()));
 //	}
-	
+
 	public FileNode addFile(File file, FileNode parent) {
 		FileNode node = new FileNode(file);
 		
