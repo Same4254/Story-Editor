@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.file.Files;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -16,7 +17,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import StoryEditor.RightClickMenu.Lambda;
+import StoryEditor.RightClickMenu.LambdaMenuItem;
 import StoryEditor.RightClickMenu.RightClickMenu;
 
 public class FileTreePanel extends JPanel {
@@ -34,22 +35,17 @@ public class FileTreePanel extends JPanel {
 		
 		setMinimumSize(new Dimension(125, 0));
 		
-		root = new FileNode(new File("res/Chapters"));
+		root = new FileNode(new File("res/Books"));
 		exploreNode(root);
 		
 		tree = new JTree(root);
-		tree.setRootVisible(true);
+		tree.setRootVisible(false);
 		tree.setShowsRootHandles(true);
 		
 		tree.expandPath(new TreePath(root.getPath()));
 		
-		rightClickMenu = new RightClickMenu(new String[] { "Test" }, new Lambda() {
-			@Override
-			public void run() {
-				System.out.println("Here");
-			}
-		});
-		
+		rightClickMenu = new RightClickMenu();
+
 		MouseAdapter adapter = new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				if(e.getClickCount() == 2) {
@@ -57,13 +53,34 @@ public class FileTreePanel extends JPanel {
 					
 					if(path != null) {
 						FileNode node = (FileNode) path.getLastPathComponent();
-						window.getEditor().addChapterTextEditor(node.getFile());
+						
+						if(node.getFile().getName().endsWith(".chp"))
+							window.getEditor().addChapterTextEditor(node.getFile());
 					}
 				}
 			}
 			
 			public void mouseReleased(MouseEvent e) {
 				if(SwingUtilities.isRightMouseButton(e)) { 
+					TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+					
+					if(path == null) {//No node selected
+						rightClickMenu.setMenuItems(
+							new LambdaMenuItem("New Story", () -> {
+								
+							})
+						);
+					} else {
+						tree.setSelectionPath(path);
+						FileNode node = (FileNode) path.getLastPathComponent();
+					
+						rightClickMenu.setMenuItems(
+							new LambdaMenuItem("Delete", () -> {
+								delete(node);
+							})
+						);
+					}
+					
 					rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 				}
 			}
@@ -86,7 +103,7 @@ public class FileTreePanel extends JPanel {
 					if(node == null)
 						return;
 					
-					
+					delete(node);
 				}
 			}
 			
@@ -101,6 +118,14 @@ public class FileTreePanel extends JPanel {
 		
 		setLayout(new BorderLayout());
 		add(scroll, BorderLayout.CENTER);
+	}
+	
+	private void delete(FileNode node) {
+		if(JOptionPane.showConfirmDialog(this, "Are you sure you would like to delete: " + node.getFile().getName() + "?", "Delete Confirmation", JOptionPane.YES_NO_OPTION) == 0) {
+			deleteFile(node.getFile());
+			DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+			model.removeNodeFromParent(node);
+		}
 	}
 	
 	private void deleteFile(File file) {
