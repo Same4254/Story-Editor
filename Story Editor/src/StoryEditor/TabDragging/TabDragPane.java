@@ -14,6 +14,8 @@ public class TabDragPane extends JTabbedPane {
 	private int dragIndex;
 	
 	public TabDragPane() {
+		setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		
 		addMouseMotionListener(new MouseMotionAdapter() {
 			public void mouseDragged(MouseEvent e) {
 				if(!dragging) {

@@ -1,6 +1,7 @@
 package StoryEditor;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -17,6 +18,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import Story.NewChapterFrame;
+import Story.NewStoryFrame;
 import StoryEditor.RightClickMenu.LambdaMenuItem;
 import StoryEditor.RightClickMenu.RightClickMenu;
 
@@ -67,18 +70,30 @@ public class FileTreePanel extends JPanel {
 					if(path == null) {//No node selected
 						rightClickMenu.setMenuItems(
 							new LambdaMenuItem("New Story", () -> {
-								
+								new NewStoryFrame(FileTreePanel.this.window);
 							})
 						);
 					} else {
 						tree.setSelectionPath(path);
 						FileNode node = (FileNode) path.getLastPathComponent();
 					
-						rightClickMenu.setMenuItems(
-							new LambdaMenuItem("Delete", () -> {
-								delete(node);
-							})
-						);
+						if(node.getFile().getName().equals("Chapters")) {//TODO replace this with some form of enumeration rather than a string
+							rightClickMenu.setMenuItems(
+								new LambdaMenuItem("Delete", () -> {
+									delete(node);
+								}),
+								
+								new LambdaMenuItem("New Chapter", () -> {
+									new NewChapterFrame(window, node);
+								})
+							);
+						} else {
+							rightClickMenu.setMenuItems(
+								new LambdaMenuItem("Delete", () -> {
+									delete(node);
+								})
+							);
+						}
 					}
 					
 					rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -120,8 +135,38 @@ public class FileTreePanel extends JPanel {
 		add(scroll, BorderLayout.CENTER);
 	}
 	
+	public void exploreFiles(File file) {
+		exploreFiles(file, root);
+	}
+	
+	public void exploreFiles(File file, FileNode parent) {
+		FileNode node = new FileNode(file);
+		
+		parent.add(node);
+		exploreNode(node);
+		
+		DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+		model.reload(parent);
+	}
+	
 	private void delete(FileNode node) {
 		if(JOptionPane.showConfirmDialog(this, "Are you sure you would like to delete: " + node.getFile().getName() + "?", "Delete Confirmation", JOptionPane.YES_NO_OPTION) == 0) {
+			if(node.getFile().getName().endsWith(".chp")) {
+				int tabCount = window.getEditor().getTabCount();
+				for(int i = 0; i < tabCount; i++) {
+					Component c = window.getEditor().getComponentAt(i);
+					
+					if(c instanceof PageEditor) {
+						PageEditor pageEditor = (PageEditor) c;
+						
+						if(pageEditor.getFile().equals(node.getFile())) {
+							window.getEditor().removeTabAt(i);
+							return;
+						}
+					}
+				}
+			}
+			
 			deleteFile(node.getFile());
 			DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 			model.removeNodeFromParent(node);
