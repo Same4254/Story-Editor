@@ -95,7 +95,7 @@ public class NewChapterFrame {
 				chapter.save();
 				
 				frame.dispose();
-				window.getFileTreePanel().exploreFiles(new File(Story.saveLocation + "/" + chapter.getTitle() + "/Chapters/" + chapter.getTitle()), chaptersNode);
+				window.getFileTreePanel().reExplore(chaptersNode);
 			}
 		});
 		buttonPanel.add(confirmButton, BorderLayout.EAST);

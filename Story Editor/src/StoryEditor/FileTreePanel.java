@@ -9,6 +9,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -56,6 +58,7 @@ public class FileTreePanel extends JPanel {
 					
 					if(path != null) {
 						FileNode node = (FileNode) path.getLastPathComponent();
+						System.out.println(node.getFile().getName());
 						
 						if(node.getFile().getName().endsWith(".chp"))
 							window.getEditor().addChapterTextEditor(node.getFile());
@@ -135,18 +138,27 @@ public class FileTreePanel extends JPanel {
 		add(scroll, BorderLayout.CENTER);
 	}
 	
-	public void exploreFiles(File file) {
-		exploreFiles(file, root);
+	public void reExplore() {
+		reExplore(root);
 	}
 	
-	public void exploreFiles(File file, FileNode parent) {
-		FileNode node = new FileNode(file);
-		
-		parent.add(node);
-		exploreNode(node);
-		
-		DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-		model.reload(parent);
+	public void reExplore(FileNode parent) {
+		exploreNode(parent);
+		reloadTree();
+	}
+	
+	private void reloadTree() {
+	    ArrayList<TreePath> expanded = new ArrayList<>();
+	    for (int i = 0; i < tree.getRowCount() - 1; i++) {
+	        TreePath currPath = tree.getPathForRow(i);
+	        TreePath nextPath = tree.getPathForRow(i + 1);
+	        if (currPath.isDescendant(nextPath)) 
+	            expanded.add(currPath);
+	    }
+	    
+	    ((DefaultTreeModel) tree.getModel()).reload();
+	    for (TreePath path : expanded)
+	        tree.expandPath(path);
 	}
 	
 	private void delete(FileNode node) {
@@ -185,22 +197,6 @@ public class FileTreePanel extends JPanel {
 	    file.delete();
 	}
 	
-//	public void changeRoot(Game game) {
-//		if(game.isSuprivised())
-//			root = new FileNode(new File("res/" + game + "/Populations"), FileNode.FileType.GENERATION);
-//		else
-//			root = new FileNode(new File("res/" + game + "/Populations"), FileNode.FileType.POPULATION_TYPE);
-//		
-//		exploreNode(root);
-//		
-//		tree.clearSelection();
-//		
-//		DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-//		model.setRoot(root);
-//		
-//		tree.expandPath(new TreePath(root.getPath()));
-//	}
-
 	public FileNode addFile(File file, FileNode parent) {
 		FileNode node = new FileNode(file);
 		
@@ -228,8 +224,13 @@ public class FileTreePanel extends JPanel {
 		if(childerenFiles == null)
 			return;
 		
+		out:
 		for(File file : childerenFiles) {
 			FileNode temp = new FileNode(file);
+			
+			for(int i = 0; i < node.getChildCount(); i++)
+				if(file.equals(((FileNode) node.getChildAt(i)).getFile()))
+					continue out;
 			
 			exploreNode(temp);
 			node.add(temp);

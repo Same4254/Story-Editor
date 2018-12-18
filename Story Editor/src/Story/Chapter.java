@@ -17,8 +17,9 @@ public class Chapter {
 		
 	public void save() {
 		File chapterFolder = new File(chaptersFolder.getPath() + "/" + title);
-		if(!chapterFolder.exists())
+		if(!chapterFolder.exists()) {
 			chapterFolder.mkdir();
+		}
 		
 		File chapterMetaData = new File(chapterFolder.getPath() + "/" + title + "-Meta");
 		if(!chapterMetaData.exists())

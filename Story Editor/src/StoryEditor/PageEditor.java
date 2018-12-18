@@ -398,6 +398,8 @@ public class PageEditor extends JPanel {
     	blockCaretListener = true;//the caret listener needs not worry of this...
     	textPane.setText("");//empty the pane
     	
+    	System.out.println(file);
+    	
     	Scanner sc = null;
 		try {
 			sc = new Scanner(file);

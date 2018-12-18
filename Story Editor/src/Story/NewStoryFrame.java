@@ -117,7 +117,7 @@ public class NewStoryFrame {
 				story.save();
 				
 				frame.dispose();
-				window.getFileTreePanel().exploreFiles(new File(Story.saveLocation + "/" + story.getTitle()));
+				window.getFileTreePanel().reExplore();
 			}
 		});
 		buttonPanel.add(confirmButton, BorderLayout.EAST);
