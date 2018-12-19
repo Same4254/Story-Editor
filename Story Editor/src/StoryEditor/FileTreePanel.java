@@ -58,8 +58,6 @@ public class FileTreePanel extends JPanel {
 					
 					if(path != null) {
 						FileNode node = (FileNode) path.getLastPathComponent();
-						System.out.println(node.getFile().getName());
-						
 						if(node.getFile().getName().endsWith(".chp"))
 							window.getEditor().addChapterTextEditor(node.getFile());
 					}
@@ -82,9 +80,9 @@ public class FileTreePanel extends JPanel {
 					
 						if(node.getFile().getName().equals("Chapters")) {//TODO replace this with some form of enumeration rather than a string
 							rightClickMenu.setMenuItems(
-								new LambdaMenuItem("Delete", () -> {
-									delete(node);
-								}),
+//								new LambdaMenuItem("Delete", () -> {
+//									delete(node);
+//								}),
 								
 								new LambdaMenuItem("New Chapter", () -> {
 									new NewChapterFrame(window, node);

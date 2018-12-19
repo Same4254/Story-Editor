@@ -35,7 +35,7 @@ public class ChapterEditor extends TabDragPane {
 		}
 		
 		PageEditor pageEditor = new PageEditor();
-		pageEditor.setFile(new File(chapter.getPath() + "/Content"));
+		pageEditor.setFile(new File(chapter.getPath()));
 		
 		addTab(chapter.getName(), pageEditor);
 		
