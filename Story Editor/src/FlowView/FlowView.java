@@ -1,10 +1,22 @@
 package FlowView;
 
-import javax.swing.JPanel;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-public class FlowView extends JPanel {
+import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
+import StoryEditor.RightClickMenu.LambdaMenuItem;
+import StoryEditor.RightClickMenu.RightClickMenu;
+
+public class FlowView extends JDesktopPane {
 	private static final long serialVersionUID = 1L;
 
+	private RightClickMenu rightClickMenu;
+	
 	/*
 	 * This View will allow the user to plan out what they want to achieve in the story or chapter. 
 	 * Essentially, there will be several boxes that the user can move and resize (possibly lock to a grid? Option?). 
@@ -27,6 +39,39 @@ public class FlowView extends JPanel {
 	 * Make this an option? Flow highlight mode...? Needs a better name. This entire thing needs a better name.
 	 */
 	public FlowView() {
+		rightClickMenu = new RightClickMenu();
+		rightClickMenu.setMenuItems(
+			new LambdaMenuItem("New Element", () -> {
+				FlowView.this.add(new Element(FlowView.this), 0);
+			})
+		);
 		
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				super.mouseReleased(e);
+				
+				if(SwingUtilities.isRightMouseButton(e))
+					rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
+	
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+//		g2d.clearRect(0, 0, getWidth(), getHeight());
+	}
+	
+	public static void main(String[] args) {
+		JFrame frame = new JFrame();
+		frame.setSize(800, 600);
+		frame.setTitle("Flow");
+		
+		FlowView flow = new FlowView();
+		frame.add(flow);
+		
+		frame.setVisible(true);
 	}
 }

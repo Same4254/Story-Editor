@@ -2,9 +2,11 @@ package TextEditor.PageKit;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 
@@ -32,12 +34,16 @@ public class PageableEditorKit extends StyledEditorKit {
     protected Insets pageMargins = new Insets(20, 20, 20, 20);
 
     private JTextPane pane;
+
+//    private double zoom;
     
     /**
      * Constructs kit instance
      */
     public PageableEditorKit(JTextPane pane) {
     	this.pane = pane;
+    	
+//    	zoom = 1.0;
     }
 
     /**
@@ -318,13 +324,27 @@ public class PageableEditorKit extends StyledEditorKit {
          * @param g Graphics
          * @param a Shape
          */
-        public void paint(Graphics g, Shape a) {
+        public void paint(Graphics graphics, Shape a) {
+        	Graphics2D g = (Graphics2D) graphics;
+        	
         	calcDrawInsets();
         	
             Rectangle alloc = (a instanceof Rectangle) ? (Rectangle) a : a.getBounds();
             
+            int panelWidth = alloc.width + 6;
+            int panelHeight = alloc.height + 50;
+            
             g.setColor(Color.gray);
-            g.fillRect(0, 0, alloc.width + 50, alloc.height + 50);
+            g.fillRect(0, 0, panelWidth, panelHeight);
+
+//            g.scale(zoom, zoom);
+            
+//            int newPageWidth = (int) (zoom * pageWidth);
+//            g.translate(pageWidth - newPageWidth, 0);
+            
+//            AffineTransform transform = g.getTransform();
+//            transform.setToScale(zoom, zoom);
+//            g.setTransform(transform);
             
             int pageCount = getPageCount();
             Rectangle page = new Rectangle();
@@ -398,6 +418,15 @@ public class PageableEditorKit extends StyledEditorKit {
         }
 
     }
+    
+//    public void changeZoom(int ticks) {
+//    	double delta = ticks / 10.0;
+//    	zoom += delta;
+//    	
+//    	System.out.println("Delta Zoom: " + delta);
+//    	System.out.println("Zoom: " + zoom);
+//    	System.out.println("------------------------------");
+//    }
 
     /**
      * Represents multipage paragraph.

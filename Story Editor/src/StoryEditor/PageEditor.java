@@ -7,9 +7,10 @@ import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,7 +19,6 @@ import java.util.Scanner;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -49,6 +49,8 @@ public class PageEditor extends JPanel {
 	
 	private boolean blockCaretListener;
 	
+	private PageableEditorKit editorKit;
+	
 	/**
 	 * Small Bugs:
 	 * 	   - Double click to select and drag left de-selects the original word
@@ -73,13 +75,22 @@ public class PageEditor extends JPanel {
         setLayout(new BorderLayout());
         
         textPane = new JTextPane();
-        textPane.setEditorKit(new PageableEditorKit(textPane));
+        
+        editorKit = new PageableEditorKit(textPane);
+        
+        textPane.setEditorKit(editorKit);
         textPane.setEditable(true);
         
 //        UndoManager undoManager = new UndoManager();
 //        textPane.getDocument().addUndoableEditListener(undoManager);
         
         JScrollPane textScrollPane = new JScrollPane(textPane); 
+        textScrollPane.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				PageEditor.this.processMouseWheelEvent(e);
+			}
+		});
         textScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         textScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(textScrollPane, BorderLayout.CENTER);
@@ -262,6 +273,27 @@ public class PageEditor extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				save();
+			}
+		});
+        
+//        addMouseListener(new MouseAdapter() {
+//        	@Override
+//        	public void mouseWheelMoved(MouseWheelEvent e) {
+//        		System.out.println("Here");
+//        		if(e.isControlDown()) {
+//        			System.out.println("In");
+//        			editorKit.changeZoom(e.getWheelRotation());
+//        		}
+//        	}
+//		});
+        
+        addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+//				if(e.isControlDown()) {
+//					editorKit.changeZoom(-e.getWheelRotation());
+//					repaint();
+//				}
 			}
 		});
         
@@ -542,14 +574,14 @@ public class PageEditor extends JPanel {
     public void setFile(File file) { this.file = file; read(); }
     public File getFile() { return this.file; }
     
-    public static void main(String[] args) throws IOException {
-    	System.setProperty("line.separator", "\n");
-    	
-    	JFrame frame = new JFrame();
-    	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1700, 1080);
-        
-        frame.add(new PageEditor());
-        frame.setVisible(true);
-    }
+//    public static void main(String[] args) throws IOException {
+//    	System.setProperty("line.separator", "\n");
+//    	
+//    	JFrame frame = new JFrame();
+//    	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setSize(1700, 1080);
+//        
+//        frame.add(new PageEditor());
+//        frame.setVisible(true);
+//    }
 }
