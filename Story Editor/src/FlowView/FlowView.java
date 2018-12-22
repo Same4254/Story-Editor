@@ -1,5 +1,6 @@
 package FlowView;
 
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
@@ -61,11 +62,24 @@ public class FlowView extends JDesktopPane {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
+
+		for(Component c : getComponents()) {
+			if(c instanceof Element) {
+				Element element = (Element) c;
+				Vertex[] verticies = element.getVerticies();
+				
+				for(int i = 0; i < verticies.length; i++) {
+					int[] coords = Vertex.getLocation(element, i);
+					g2d.fillRect(coords[0], coords[1], Vertex.width, Vertex.height);
+				}
+			}
+		}
 //		g2d.clearRect(0, 0, getWidth(), getHeight());
 	}
 	
 	public static void main(String[] args) {
 		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(800, 600);
 		frame.setTitle("Flow");
 		

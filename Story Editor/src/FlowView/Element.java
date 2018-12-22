@@ -4,6 +4,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
 import javax.swing.JInternalFrame;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
@@ -17,6 +18,8 @@ public class Element extends JInternalFrame implements ComponentListener {
 	
 	private FlowView child;
 	
+	private Vertex[] verticies;
+	
 	public Element(FlowView parent) {
 		super("Element", true, true, true);
 		
@@ -28,8 +31,17 @@ public class Element extends JInternalFrame implements ComponentListener {
 		textArea = new JTextArea();
 		child = new FlowView();
 		
-		splitPane.setTopComponent(textArea);
+		JScrollPane scroll = new JScrollPane();
+		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scroll.setViewportView(textArea);
+		
+		splitPane.setTopComponent(scroll);
 		splitPane.setBottomComponent(child);
+		
+		verticies = new Vertex[8];
+		for(int i = 0; i < verticies.length; i++)
+			verticies[i] = new Vertex(this);
 		
 		setSize(400, 400);
 		add(splitPane);
@@ -40,7 +52,7 @@ public class Element extends JInternalFrame implements ComponentListener {
 	
 	@Override
 	public void componentResized(ComponentEvent e) {
-		
+		parent.repaint();
 	}
 
 	@Override
@@ -55,8 +67,9 @@ public class Element extends JInternalFrame implements ComponentListener {
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
-	
+
 	}
 	
+	public Vertex[] getVerticies() { return verticies; }
 	public JTextArea getTextArea() { return textArea; }
 }
