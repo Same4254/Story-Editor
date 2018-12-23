@@ -2,6 +2,7 @@ package FlowView;
 
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
@@ -17,7 +18,6 @@ public class Element extends JInternalFrame implements ComponentListener {
 	private JTextArea textArea;
 	
 	private FlowView child;
-	
 	private Vertex[] verticies;
 	
 	public Element(FlowView parent) {
@@ -31,7 +31,7 @@ public class Element extends JInternalFrame implements ComponentListener {
 		textArea = new JTextArea();
 		child = new FlowView();
 		
-		JScrollPane scroll = new JScrollPane();
+		JScrollPane scroll = new JScrollPane(); 
 		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scroll.setViewportView(textArea);

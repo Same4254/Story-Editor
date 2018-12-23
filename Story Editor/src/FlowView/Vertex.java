@@ -1,18 +1,33 @@
 package FlowView;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 public class Vertex {
 	public static final int offSetX = 10, offSetY = 10;
 	public static final int width = 5, height = 5;
 	
 	private Element element;
+	private Rectangle rectangle;
+	
+	private int centerX, centerY;
 	
 	public Vertex(Element element) {
 		this.element = element;
+		rectangle = new Rectangle();
+	}
+
+	public void draw(Graphics2D g2d, int index) {
+		int[] coords = getLocation(index);
+		
+		g2d.fillRect(coords[0], coords[1], width, height);
+		rectangle.setBounds(coords[0], coords[1], width, height);
+		
+		centerX = coords[0] + (width / 2);
+		centerY = coords[1] + (height / 2);
 	}
 	
-	public static int[] getLocation(Element element, int index) {
+	private int[] getLocation(int index) {
 		int x = element.getX();
 		int y = element.getY();
 		int width = element.getWidth();
@@ -48,6 +63,11 @@ public class Vertex {
 		
 		return toRet;
 	}
+	
+	public Rectangle getRectangle() { return rectangle; }
+	
+	public int getCenterX() { return centerX; }
+	public int getCenterY() { return centerY; }
 	
 	public Element getElement() { return element; }
 }

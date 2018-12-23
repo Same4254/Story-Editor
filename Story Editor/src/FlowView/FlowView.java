@@ -3,8 +3,10 @@ package FlowView;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -17,6 +19,10 @@ public class FlowView extends JDesktopPane {
 	private static final long serialVersionUID = 1L;
 
 	private RightClickMenu rightClickMenu;
+	private ArrayList<Connection> connections;
+	
+	private Point tempDrawOrigin;
+	private boolean tempDrawing;
 	
 	/*
 	 * This View will allow the user to plan out what they want to achieve in the story or chapter. 
@@ -40,6 +46,8 @@ public class FlowView extends JDesktopPane {
 	 * Make this an option? Flow highlight mode...? Needs a better name. This entire thing needs a better name.
 	 */
 	public FlowView() {
+		connections = new ArrayList<>();
+		
 		rightClickMenu = new RightClickMenu();
 		rightClickMenu.setMenuItems(
 			new LambdaMenuItem("New Element", () -> {
@@ -52,8 +60,31 @@ public class FlowView extends JDesktopPane {
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
 				
-				if(SwingUtilities.isRightMouseButton(e))
+				if(SwingUtilities.isRightMouseButton(e)) {
+					boolean onVertex = false;
+					
+					for(Component c : getComponents()) {
+						if(c instanceof Element) {
+							Element element = (Element) c;
+							
+							for(Vertex v : element.getVerticies()) {
+								if(v.getRectangle().contains(e.getPoint())) {
+									onVertex = true;
+									
+									rightClickMenu.setMenuItems(
+										new LambdaMenuItem("New Connection", () -> {
+											tempDrawOrigin = new Point(v.getCenterX(), v.getCenterY());
+										})
+									);
+									
+									break;
+								}
+							}
+						}
+					}
+					
 					rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+				}
 			}
 		});
 	}
@@ -68,13 +99,13 @@ public class FlowView extends JDesktopPane {
 				Element element = (Element) c;
 				Vertex[] verticies = element.getVerticies();
 				
-				for(int i = 0; i < verticies.length; i++) {
-					int[] coords = Vertex.getLocation(element, i);
-					g2d.fillRect(coords[0], coords[1], Vertex.width, Vertex.height);
-				}
+				for(int i = 0; i < verticies.length; i++)
+					verticies[i].draw(g2d, i);
 			}
 		}
-//		g2d.clearRect(0, 0, getWidth(), getHeight());
+		
+		for(Connection c : connections)
+			c.draw(g2d);
 	}
 	
 	public static void main(String[] args) {
@@ -84,8 +115,16 @@ public class FlowView extends JDesktopPane {
 		frame.setTitle("Flow");
 		
 		FlowView flow = new FlowView();
-		frame.add(flow);
 		
+		Element e1 = new Element(flow);
+		Element e2 = new Element(flow);
+		
+		flow.add(e1);
+		flow.add(e2);
+
+		flow.connections.add(new Connection(e1.getVerticies()[0], e2.getVerticies()[2]));
+		
+		frame.add(flow);
 		frame.setVisible(true);
 	}
 }
