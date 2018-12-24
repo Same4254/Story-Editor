@@ -4,8 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 public class Vertex {
-	public static final int offSetX = 10, offSetY = 10;
-	public static final int width = 5, height = 5;
+	public static final int offSetX = 15, offSetY = 15;
+	public static final int width = 10, height = 10;
 	
 	private Element element;
 	private Rectangle rectangle;
@@ -63,7 +63,7 @@ public class Vertex {
 		
 		return toRet;
 	}
-	
+
 	public Rectangle getRectangle() { return rectangle; }
 	
 	public int getCenterX() { return centerX; }
