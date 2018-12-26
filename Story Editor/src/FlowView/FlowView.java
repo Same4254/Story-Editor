@@ -5,12 +5,16 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
+import javax.xml.parsers.DocumentBuilder;
 
 import StoryEditor.RightClickMenu.LambdaMenuItem;
 import StoryEditor.RightClickMenu.RightClickMenu;
@@ -30,6 +34,8 @@ public class FlowView extends JDesktopPane implements MouseInputListener {
 	//Temporary variables for spanning camera
 	private boolean dragging;
 	private Point lastDrag;
+	
+	private File file;
 	
 	/*
 	 * This View will allow the user to plan out what they want to achieve in the story or chapter. 
@@ -52,13 +58,39 @@ public class FlowView extends JDesktopPane implements MouseInputListener {
 	 * Or rather maybe be able to highlight what paragraphs pertain to what element in the flow view?
 	 * Make this an option? Flow highlight mode...? Needs a better name. This entire thing needs a better name.
 	 */
-	public FlowView() {
+	public FlowView(File file) {
+		this.file = file;
+		
 		connections = new ArrayList<>();
 		
 		rightClickMenu = new RightClickMenu();
 		
 		addMouseMotionListener(this);
 		addMouseListener(this);
+	}
+	
+	public void save() {
+		PrintWriter writer = null;
+		
+		try {
+			writer = new PrintWriter(file);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
+		for(Component c : getComponents()) {
+			if(c instanceof Element) {
+				Element element = (Element) c;
+				
+				String text = element.getTextArea().getText();
+			}
+		}
+		
+		writer.close();
+	}
+	
+	public void readFile() {
+		
 	}
 	
 	@Override
@@ -213,7 +245,7 @@ public class FlowView extends JDesktopPane implements MouseInputListener {
 		frame.setSize(800, 600);
 		frame.setTitle("Flow");
 		
-		FlowView flow = new FlowView();
+		FlowView flow = new FlowView(null);
 		
 		frame.add(flow);
 		frame.setVisible(true);
