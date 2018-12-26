@@ -11,6 +11,8 @@ public class XMLTesting {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		
+		write();
 	}
 	
 	public static void read() {
