@@ -1,12 +1,13 @@
-package TextEditor;
+package StoryEditor;
 
 import java.awt.Component;
 import java.io.File;
 
-import StoryEditor.PageEditor;
-import StoryEditor.Window;
+import javax.swing.JScrollPane;
+
 import StoryEditor.TabDragging.TabComponent;
 import StoryEditor.TabDragging.TabDragPane;
+import TextEditor.PageEditor;
 
 public class ChapterEditor extends TabDragPane {
 	private static final long serialVersionUID = 1L;
@@ -37,7 +38,10 @@ public class ChapterEditor extends TabDragPane {
 		PageEditor pageEditor = new PageEditor();
 		pageEditor.setFile(new File(chapter.getPath()));
 		
-		addTab(chapter.getName(), pageEditor);
+		JScrollPane scroll = new JScrollPane(pageEditor);
+		scroll.getVerticalScrollBar().setUnitIncrement(10);
+		
+		addTab(chapter.getName(), scroll);
 		
 		setSelectedIndex(getTabCount() - 1);
 		setTabComponentAt(getTabCount() - 1, new TabComponent(this, chapter.getName()));

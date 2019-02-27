@@ -339,6 +339,8 @@ public class PageableEditorKit extends StyledEditorKit {
 
 //            g.scale(zoom, zoom);
             
+//            g.scale(zoom, zoom);
+            
 //            int newPageWidth = (int) (zoom * pageWidth);
 //            g.translate(pageWidth - newPageWidth, 0);
             

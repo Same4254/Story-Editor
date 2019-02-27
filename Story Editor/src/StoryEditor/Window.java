@@ -3,7 +3,6 @@ package StoryEditor;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 
-import TextEditor.ChapterEditor;
 import Util.ImageUtils;
 
 /**

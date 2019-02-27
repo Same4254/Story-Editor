@@ -24,6 +24,7 @@ import Story.NewChapterFrame;
 import Story.NewStoryFrame;
 import StoryEditor.RightClickMenu.LambdaMenuItem;
 import StoryEditor.RightClickMenu.RightClickMenu;
+import TextEditor.PageEditor;
 
 public class FileTreePanel extends JPanel {
 	private static final long serialVersionUID = 1L;

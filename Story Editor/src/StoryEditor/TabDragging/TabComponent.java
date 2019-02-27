@@ -10,7 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import TextEditor.ChapterEditor;
+import StoryEditor.ChapterEditor;
 
 public class TabComponent	extends JPanel {
 	private static final long serialVersionUID = 1L;
