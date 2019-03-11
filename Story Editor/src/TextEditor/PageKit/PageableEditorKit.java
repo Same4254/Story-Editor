@@ -34,6 +34,8 @@ public class PageableEditorKit extends StyledEditorKit {
     protected Insets pageMargins = new Insets(20, 20, 20, 20);
 
     private JTextPane pane;
+    
+    private int pageX;
 
 //    private double zoom;
     
@@ -60,6 +62,10 @@ public class PageableEditorKit extends StyledEditorKit {
      */
     public int getPageWidth() {
         return pageWidth;
+    }
+    
+    public int getPageX() { 
+    	return pageX;
     }
 
     /**
@@ -351,6 +357,9 @@ public class PageableEditorKit extends StyledEditorKit {
             int pageCount = getPageCount();
             Rectangle page = new Rectangle();
             page.x = alloc.x;
+            
+            pageX = page.x + DRAW_PAGE_INSET_X;
+            
             page.y = alloc.y;
             page.height = pageHeight;
             page.width = pageWidth;

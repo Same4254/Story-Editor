@@ -2,30 +2,29 @@ package TextEditor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Event;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
 import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 
 import StoryEditor.RightClickMenu.LambdaMenuItem;
 import StoryEditor.RightClickMenu.RightClickMenu;
@@ -34,16 +33,19 @@ import TextEditor.PageKit.PageableEditorKit;
 public class PageEditor extends JPanel {
 	private static final long serialVersionUID = 1L;
 
-	private JComboBox<String> fontFamilies;
-	private JComboBox<Integer> fontSizes;
-	private JToggleButton boldSwitch, italicSwitch, underlineSwitch;
-	private JButton saveButton;
-	
 	private File file;
 	
 	private boolean blockCaretListener;
 	
+	private ToolBarPanel toolBar;
+	
+	private JLayeredPane layeredPane;
+	
+	private TopLayerPanel topLayer;
+	
+	private JScrollPane scrollPane;
 	private JTextPane textPane;
+
 	private PageableEditorKit editorKit;
 	private PageEditorIO io;
 	
@@ -70,7 +72,7 @@ public class PageEditor extends JPanel {
 	 *     - Save project folder to google drive to allow multi-computer development
 	 */
     public PageEditor() {
-        setLayout(new BorderLayout());
+//        setLayout(new BorderLayout());
         textPane = new JTextPane();
         io = new PageEditorIO(this);
         editorKit = new PageableEditorKit(textPane);
@@ -92,130 +94,32 @@ public class PageEditor extends JPanel {
 //        textScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 //        add(textScrollPane, BorderLayout.CENTER);
         
-        JPanel buttons = new JPanel();
+        toolBar = new ToolBarPanel(this);
         
-        fontFamilies = new JComboBox<>();
-        fontFamilies.setFocusable(false);
+        setLayout(new BorderLayout());
+        add(toolBar, BorderLayout.NORTH);//(buttons, BorderLayout.NORTH);
         
-        fontFamilies.addItem("Comic Sans MS");
-        fontFamilies.addItem("Courier New");
+        scrollPane = new JScrollPane(textPane);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(10);
         
-        fontFamilies.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange() == ItemEvent.SELECTED) {
-					String family = (String) fontFamilies.getSelectedItem();
-					String toReplace = textPane.getSelectedText();
-					
-					setFontFamily(family);
-					
-					if(toReplace == null)
-						textPane.replaceSelection(toReplace);
-				}
-			}
-		});
+        topLayer = new TopLayerPanel(this);
+        
+        layeredPane = new JLayeredPane();
+        layeredPane.add(scrollPane, new Integer(0));
+        layeredPane.add(topLayer, new Integer(1));
 
-        setFontFamily(fontFamilies.getItemAt(0));
-        buttons.add(fontFamilies);
-        
-        fontSizes = new JComboBox<>();
-        fontSizes.setFocusable(false);
-        
-        fontSizes.addItem(12);
-        fontSizes.addItem(14);
-        fontSizes.addItem(16);
-        fontSizes.addItem(18);
-        fontSizes.addItem(32);
-        
-        fontSizes.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange() == ItemEvent.SELECTED) {
-					int size = (Integer) fontSizes.getSelectedItem();
-					String toReplace = textPane.getSelectedText();
-					
-					setFontSize(size);
-					
-					if(toReplace == null)
-						textPane.replaceSelection(toReplace);
-				}
-			}
-		});
-        setFontSize(fontSizes.getItemAt(0));
-        
-        buttons.add(fontSizes);
-        
-        boldSwitch = new JToggleButton("Bold");
-        boldSwitch.setFocusable(false);
-        boldSwitch.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				boolean bold = boldSwitch.isSelected();
-				String toReplace = textPane.getSelectedText();
-				
-				setBold(bold);
-				
-				if(toReplace == null)
-					textPane.replaceSelection(toReplace);
-			}
-		});
-        setBold(false);
-        
-        buttons.add(boldSwitch);
-        
-        italicSwitch = new JToggleButton("Italics");
-        italicSwitch.setFocusable(false);
-        italicSwitch.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				boolean italic = italicSwitch.isSelected();
-				String toReplace = textPane.getSelectedText();
-				
-				setItalic(italic);
-				
-				if(toReplace == null)
-					textPane.replaceSelection(toReplace);
-			}
-		});
-        setItalic(false);
-        
-        buttons.add(italicSwitch);
-        
-        underlineSwitch = new JToggleButton("Underline");
-        underlineSwitch.setFocusable(false);
-        underlineSwitch.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				boolean underline = underlineSwitch.isSelected();
-				String toReplace = textPane.getSelectedText();
-				
-				setUnderline(underline);
-				
-				if(toReplace == null)
-					textPane.replaceSelection(toReplace);
-			}
-		});
-        setUnderline(false);
-        
-        buttons.add(underlineSwitch);
-        
-        saveButton = new JButton("Save");
-        saveButton.setFocusable(false);
-        
-        saveButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				blockCaretListener = true;
-				io.save();
-				blockCaretListener = false;
-			}
-		});
-        
-        buttons.add(saveButton);
-        
-        add(buttons, BorderLayout.NORTH);
-        add(textPane, BorderLayout.CENTER);
+        add(layeredPane, BorderLayout.CENTER);
 
+        layeredPane.addComponentListener(new ComponentAdapter() {
+        	@Override
+        	public void componentResized(ComponentEvent e) {
+        		super.componentResized(e);
+        		
+        		scrollPane.setSize(layeredPane.getSize());
+        		topLayer.setSize(layeredPane.getSize());
+        	}
+		});
+        
         textPane.addCaretListener(new CaretListener() {
 			@Override
 			public void caretUpdate(CaretEvent e) {
@@ -224,50 +128,48 @@ public class PageEditor extends JPanel {
 			}
 		});
         
-        getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK, true), "Bold");
-        getActionMap().put("Bold", new AbstractAction() {
+        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK, true), "Bold");
+        textPane.getActionMap().put("Bold", new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				boldSwitch.doClick();
+				toolBar.getBoldSwitch().doClick();
 			}
 		});
         
-        getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_MASK, true), "Italic");
-        getActionMap().put("Italic", new AbstractAction() {
+        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_MASK, true), "Italic");
+        textPane.getActionMap().put("Italic", new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				italicSwitch.doClick();
+				toolBar.getItalicSwitch().doClick();
 			}
 		});
         
-        getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_MASK, true), "Underline");
-        getActionMap().put("Underline", new AbstractAction() {
+        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_MASK, true), "Underline");
+        textPane.getActionMap().put("Underline", new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				underlineSwitch.doClick();
+				toolBar.getUnderlineSwitch().doClick();
 			}
 		});
         
-        getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK, true), "Save");
-        getActionMap().put("Save", new AbstractAction() {
+        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK, true), "Save");
+        textPane.getActionMap().put("Save", new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				saveButton.doClick();
-//				save();
+				toolBar.getSaveButton().doClick();
 			}
 		});
         
-        //not working
-        getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK, true), "Comment");
-        getActionMap().put("Comment", new AbstractAction() {
+        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_C, Event.CTRL_MASK | Event.SHIFT_MASK, true), "Comment");
+        textPane.getActionMap().put("Comment", new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -341,12 +243,12 @@ public class PageEditor extends JPanel {
 //		});
     }
     
-    public void addComment(int index1, int index2) {
+    public void addComment(int index0, int index1) {
     	SimpleAttributeSet sas = new SimpleAttributeSet();
 	    StyleConstants.setBackground(sas, Color.YELLOW);
 	    ((DefaultStyledDocument) textPane.getDocument()).setCharacterAttributes(
-	    		Math.min(index1,  index2), 
-	    		Math.abs(index1 - index2), 
+	    		Math.min(index0,  index1), 
+	    		Math.abs(index0 - index1), 
 	    		sas, false);//(start, length, sas, false);
     }
     
@@ -374,33 +276,34 @@ public class PageEditor extends JPanel {
     	
     	textPane.setCaretPosition(caretPosition);
     	
-    	fontFamilies.setSelectedItem(getFontFamily());
-		fontSizes.setSelectedItem(getFontSize());
-		boldSwitch.setSelected(isBold());
-		italicSwitch.setSelected(isItalic());
-		underlineSwitch.setSelected(isUnderline());
+    	toolBar.getFontFamilies().setSelectedItem(getFontFamily());
+		toolBar.getFontSizes().setSelectedItem(getFontSize());
+		toolBar.getBoldSwitch().setSelected(isBold());
+		toolBar.getItalicSwitch().setSelected(isItalic());
+		toolBar.getUnderlineSwitch().setSelected(isUnderline());
 		
 		textPane.setCaretPosition(temp);
 		
 		blockCaretListener = false;//unblock the listener
     }
     
-    private Object getAttribute(Object constant) { return textPane.getCharacterAttributes().getAttribute(constant); }
-
-    protected void setAttribute(Object name, Object value) {
-    	StyleContext context = StyleContext.getDefaultStyleContext();
-		AttributeSet set = context.addAttribute(SimpleAttributeSet.EMPTY, name, value);
-		
-		textPane.setCharacterAttributes(set, false);
+    public Rectangle indexToLocation(int index) {
+    	try {
+			return textPane.getUI().modelToView(textPane, index);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+			return null;
+		}
     }
     
-    private void setFontFamily(String family) { setAttribute(StyleConstants.FontFamily, family); }
-    private void setFontSize(int size) { setAttribute(StyleConstants.Size, size); }
-    private void setBold(boolean bold) { setAttribute(StyleConstants.Bold, bold); }
-    private void setItalic(boolean italic) { setAttribute(StyleConstants.Italic, italic); }
-    private void setUnderline(boolean underline) { setAttribute(StyleConstants.Underline, underline); }
+    protected Object getAttribute(Object constant) { return textPane.getCharacterAttributes().getAttribute(constant); }
+    protected void setCharacterAttribute(Object constant, Object value) {
+    	SimpleAttributeSet attr = new SimpleAttributeSet();
+    	attr.addAttribute(constant, value);
+    	textPane.setCharacterAttributes(attr, false);
+    }
     
-    private String getFontFamily() { return getAttribute(StyleConstants.FontFamily).toString(); }
+    private Object getFontFamily() { return getAttribute(StyleConstants.FontFamily); }
     private Object getFontSize() { return getAttribute(StyleConstants.FontSize); }
     private boolean isBold() { return (Boolean) getAttribute(StyleConstants.Bold); }
     private boolean isItalic() { return (Boolean) getAttribute(StyleConstants.Italic); }
@@ -412,8 +315,22 @@ public class PageEditor extends JPanel {
     	return (Boolean) value;
     }
 
+    public ToolBarPanel getToolBarPanel() { return toolBar; }
+    public JLayeredPane getLayeredPane() { return layeredPane; }
+
+    public TopLayerPanel getTopLayerPanel() { return topLayer; }
     
-    public JTextPane getTextPane() { return textPane; }
+    public JScrollPane getScrollPane() { return scrollPane; }
+    public JTextPane getTextPane() { return textPane; }    
+    
+    public PageableEditorKit getEditorKit() { return editorKit; }
+    
+    protected void save() {
+    	blockCaretListener = true;
+		io.save();
+		blockCaretListener = false;
+    }
+    
     public File getFile() { return this.file; }
     public void setFile(File file) { 
     	this.file = file; 

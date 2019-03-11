@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 import javax.swing.text.Element;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.AbstractDocument.LeafElement;
 
 public class PageEditorIO {
@@ -207,8 +208,13 @@ public class PageEditorIO {
     		ArrayList<Object> revisions = difference.getRevisions();
     		
     		//Set all the attributes accordingly, uses hashmap to pull Style constants from a given string
-    		for(int j = 0; j < attributes.size(); j++)
-    			editor.setAttribute(AttributeCommand.objectMap.get(attributes.get(j)), revisions.get(j));
+    		SimpleAttributeSet attr = new SimpleAttributeSet();
+    		for(int j = 0; j < attributes.size(); j++) {
+    			attr.addAttribute(AttributeCommand.objectMap.get(attributes.get(j)), revisions.get(j));
+    			//editor.setAttribute(AttributeCommand.objectMap.get(attributes.get(j)), revisions.get(j));
+    		}
+    		
+    		editor.getTextPane().setCharacterAttributes(attr, true);
     		
     		//Paste the content
     		if(i == differences.length - 1)

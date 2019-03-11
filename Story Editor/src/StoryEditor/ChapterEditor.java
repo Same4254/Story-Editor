@@ -3,8 +3,6 @@ package StoryEditor;
 import java.awt.Component;
 import java.io.File;
 
-import javax.swing.JScrollPane;
-
 import StoryEditor.TabDragging.TabComponent;
 import StoryEditor.TabDragging.TabDragPane;
 import TextEditor.PageEditor;
@@ -38,10 +36,7 @@ public class ChapterEditor extends TabDragPane {
 		PageEditor pageEditor = new PageEditor();
 		pageEditor.setFile(new File(chapter.getPath()));
 		
-		JScrollPane scroll = new JScrollPane(pageEditor);
-		scroll.getVerticalScrollBar().setUnitIncrement(10);
-		
-		addTab(chapter.getName(), scroll);
+		addTab(chapter.getName(), pageEditor);
 		
 		setSelectedIndex(getTabCount() - 1);
 		setTabComponentAt(getTabCount() - 1, new TabComponent(this, chapter.getName()));
