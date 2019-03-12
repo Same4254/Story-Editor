@@ -23,6 +23,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
@@ -246,6 +247,19 @@ public class PageEditor extends JPanel {
     public void addComment(int index0, int index1) {
     	SimpleAttributeSet sas = new SimpleAttributeSet();
 	    StyleConstants.setBackground(sas, Color.YELLOW);
+	    
+	    Position p0 = null, p1 = null;
+		try {
+			p0 = textPane.getDocument().createPosition(Math.min(index0, index1));
+			p1 = textPane.getDocument().createPosition(Math.max(index0, index1));
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+			return;
+		}
+	    
+//	    StyleConstants.setComponent(sas, new CommentPanel(p0, p1));
+		sas.addAttribute("Comment", new CommentPanel(p0, p1));
+		
 	    ((DefaultStyledDocument) textPane.getDocument()).setCharacterAttributes(
 	    		Math.min(index0,  index1), 
 	    		Math.abs(index0 - index1), 
@@ -281,6 +295,10 @@ public class PageEditor extends JPanel {
 		toolBar.getBoldSwitch().setSelected(isBold());
 		toolBar.getItalicSwitch().setSelected(isItalic());
 		toolBar.getUnderlineSwitch().setSelected(isUnderline());
+		
+		if(textPane.getCharacterAttributes().getAttribute("Comment") instanceof CommentPanel) {
+			System.out.println("Here");
+		}
 		
 		textPane.setCaretPosition(temp);
 		
