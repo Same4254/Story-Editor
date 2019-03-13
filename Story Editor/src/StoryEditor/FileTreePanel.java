@@ -10,13 +10,13 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
@@ -130,6 +130,8 @@ public class FileTreePanel extends JPanel {
 				
 			}
 		});
+		
+		tree.expandPath(new TreePath(((DefaultMutableTreeNode)root.getChildAt(0).getChildAt(0).getChildAt(3)).getPath()));
 		
 		JScrollPane scroll = new JScrollPane(tree);
 		

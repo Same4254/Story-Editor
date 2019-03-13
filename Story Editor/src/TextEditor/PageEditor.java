@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.border.LineBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.BadLocationException;
@@ -51,6 +52,8 @@ public class PageEditor extends JPanel {
 	private PageEditorIO io;
 	
 	private RightClickMenu rightClickMenu;
+	
+	private CommentManager commentManager;
 	
 	/**
 	 * Small Bugs:
@@ -200,26 +203,10 @@ public class PageEditor extends JPanel {
         	}
         });
         
-//        addMouseListener(new MouseAdapter() {
-//        	@Override
-//        	public void mouseWheelMoved(MouseWheelEvent e) {
-//        		System.out.println("Here");
-//        		if(e.isControlDown()) {
-//        			System.out.println("In");
-//        			editorKit.changeZoom(e.getWheelRotation());
-//        		}
-//        	}
-//		});
-        
-//        addMouseWheelListener(new MouseWheelListener() {
-//			@Override
-//			public void mouseWheelMoved(MouseWheelEvent e) {
-//				if(e.isControlDown()) {
-//					editorKit.changeZoom(-e.getWheelRotation());
-//					repaint();
-//				}
-//			}
-//		});
+        commentManager = new CommentManager(this);
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
+        	commentManager.justifyAllVisible();
+        });
         
 //        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK, true), "Undo");
 //        textPane.getActionMap().put("Undo", new AbstractAction() {
@@ -258,7 +245,18 @@ public class PageEditor extends JPanel {
 		}
 	    
 //	    StyleConstants.setComponent(sas, new CommentPanel(p0, p1));
-		sas.addAttribute("Comment", new CommentPanel(p0, p1));
+		CommentPanel commentPanel = new CommentPanel(p0, p1);
+		commentPanel.setBorder(new LineBorder(Color.BLACK));
+		
+		commentManager.addComment(commentPanel);
+		commentManager.justify(commentPanel);
+		
+		topLayer.add(commentPanel);
+		topLayer.repaint();
+		topLayer.revalidate();
+		topLayer.validate();
+		
+		sas.addAttribute("Comment", commentPanel);
 		
 	    ((DefaultStyledDocument) textPane.getDocument()).setCharacterAttributes(
 	    		Math.min(index0,  index1), 
@@ -297,7 +295,7 @@ public class PageEditor extends JPanel {
 		toolBar.getUnderlineSwitch().setSelected(isUnderline());
 		
 		if(textPane.getCharacterAttributes().getAttribute("Comment") instanceof CommentPanel) {
-			System.out.println("Here");
+			
 		}
 		
 		textPane.setCaretPosition(temp);

@@ -24,7 +24,7 @@ public class Window extends JSplitPane {
 	private Window init() {
 		fileTree = new FileTreePanel(this);
 		editor = new ChapterEditor(this);
-
+		
 		setTopComponent(fileTree);
 		setBottomComponent(editor);
 		
@@ -39,7 +39,7 @@ public class Window extends JSplitPane {
 		
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(1000, 600);
+		frame.setSize(1200, 800);
 		frame.setTitle("Story Editor");
 		frame.setIconImage(ImageUtils.readImage("res/book.png"));
 		
