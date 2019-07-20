@@ -1,4 +1,4 @@
-package TextEditor;
+package TextEditor.IO;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -9,6 +9,9 @@ import java.util.Scanner;
 import javax.swing.text.Element;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.AbstractDocument.LeafElement;
+
+import TextEditor.AttributeCommand;
+import TextEditor.PageEditor;
 
 public class PageEditorIO {
 

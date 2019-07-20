@@ -1,4 +1,4 @@
-package TextEditor;
+package TextEditor.Comments;
 
 import java.awt.BorderLayout;
 
@@ -14,6 +14,10 @@ public class CommentPanel extends JPanel {
 	private JButton resolveButton;
 	private Position startPosition, endPosition;
 	
+	/*
+	 * This panel allows the user to type in the comment about the highlighted text. 
+	 * (In between the two position objects)
+	 */
 	public CommentPanel(Position startPosition, Position endPosition) {
 		this.startPosition = startPosition;
 		this.endPosition = endPosition;

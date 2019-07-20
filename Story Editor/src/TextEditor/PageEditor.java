@@ -22,14 +22,23 @@ import javax.swing.KeyStroke;
 import javax.swing.border.LineBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.DocumentFilter;
 import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyleContext.NamedStyle;
 
 import StoryEditor.RightClickMenu.LambdaMenuItem;
 import StoryEditor.RightClickMenu.RightClickMenu;
+import TextEditor.Comments.CommentManager;
+import TextEditor.Comments.CommentPanel;
+import TextEditor.IO.PageEditorIO;
 import TextEditor.PageKit.PageableEditorKit;
 
 public class PageEditor extends JPanel {
@@ -56,6 +65,13 @@ public class PageEditor extends JPanel {
 	private CommentManager commentManager;
 	
 	/**
+	 * Comments:
+	 * 	   - Selection over many indexes
+	 * 			- Removal
+	 * 			- Commenting on something with a comment already 
+	 *     - Removal by resolution
+	 *     - 
+	 * 
 	 * Small Bugs:
 	 * 	   - Double click to select and drag left de-selects the original word
 	 * 	   - Undo manager will undo hot key presses, but that doesn't update the gui
@@ -208,6 +224,25 @@ public class PageEditor extends JPanel {
         	commentManager.justifyAllVisible();
         });
         
+        ((DefaultStyledDocument) textPane.getDocument()).setDocumentFilter(new DocumentFilter() {
+        	@Override
+        	public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+        		if(length == 1) {
+        			//Check if a comment needs to also be removed
+	        		Object value = textPane.getStyledDocument().getCharacterElement(offset).getAttributes().getAttribute("Comment");
+	        		if(value instanceof CommentPanel) {
+	        			CommentPanel panel = (CommentPanel) value;
+	        			if(Math.abs(panel.getStartPosition().getOffset() - panel.getEndPosition().getOffset()) == 1) {
+	        				commentManager.removeComment(panel);
+	        				layeredPane.remove(panel);
+	        			}
+	        		}
+        		}
+        		
+        		super.remove(fb, offset, length);
+        	}
+        });
+        
 //        textPane.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK, true), "Undo");
 //        textPane.getActionMap().put("Undo", new AbstractAction() {
 //			private static final long serialVersionUID = 1L;
@@ -231,8 +266,26 @@ public class PageEditor extends JPanel {
 //		});
     }
     
+    /*
+     * Given two indexes, create a comment panel and show it to the user.
+     * 
+     * The indexes: any order. 2, 5 or 5, 2 will work. This function will take the min and max of the two.  
+     * 		(These represent the indexes of characters in the text)
+     * If these indexes represent a bad location in the document, then this method will have no effect.
+     * 
+     * This method will highlight the text between the indexes (inclusive) in yellow.
+     * In addition, a panel will be created to allow the user to write text. This panel will be added to the comment manager.
+     * A reference to this panel will be added as a attribute to the text, allowing a character to reference the comment panel if necessary
+     */
     public void addComment(int index0, int index1) {
-    	SimpleAttributeSet sas = new SimpleAttributeSet();
+    	NamedStyle sas = new StyleContext().new NamedStyle();
+    	sas.addChangeListener(e -> {
+    		Object value = sas.getAttribute("Comment");
+    		if(value instanceof CommentPanel) {
+    			System.out.println("Change Listener Picked up");
+    		}
+    	});
+    	
 	    StyleConstants.setBackground(sas, Color.YELLOW);
 	    
 	    Position p0 = null, p1 = null;
@@ -251,10 +304,10 @@ public class PageEditor extends JPanel {
 		commentManager.addComment(commentPanel);
 		commentManager.justify(commentPanel);
 		
-		topLayer.add(commentPanel);
-		topLayer.repaint();
-		topLayer.revalidate();
-		topLayer.validate();
+//		topLayer.add(commentPanel);
+//		topLayer.repaint();//layered pane needs to paint this component (con of null manager)
+//		topLayer.revalidate();
+//		topLayer.validate();
 		
 		sas.addAttribute("Comment", commentPanel);
 		
@@ -294,9 +347,15 @@ public class PageEditor extends JPanel {
 		toolBar.getItalicSwitch().setSelected(isItalic());
 		toolBar.getUnderlineSwitch().setSelected(isUnderline());
 		
-		if(textPane.getCharacterAttributes().getAttribute("Comment") instanceof CommentPanel) {
-			
-		}
+//		if(textPane.getCharacterAttributes().getAttribute("Comment") instanceof CommentPanel) {
+//			CommentPanel panel = (CommentPanel) textPane.getCharacterAttributes().getAttribute("Comment");
+//			
+//			System.out.println("Thingngngnn");
+//			
+//			if(panel.getStartPosition().getOffset() == panel.getEndPosition().getOffset()) {
+//				System.out.println("Here In the attributes");
+//			}
+//		}
 		
 		textPane.setCaretPosition(temp);
 		

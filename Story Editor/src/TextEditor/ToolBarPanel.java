@@ -19,6 +19,9 @@ public class ToolBarPanel extends JPanel {
 	private JToggleButton boldSwitch, italicSwitch, underlineSwitch;
 	private JButton saveButton;
 	
+	/*
+	 * This panel is where the user can select fonts, underline, bold, etc...
+	 */
 	public ToolBarPanel(PageEditor editor) {
 		fontFamilies = new JComboBox<>();
         fontFamilies.setFocusable(false);
